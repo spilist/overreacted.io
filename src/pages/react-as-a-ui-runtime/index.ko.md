@@ -14,7 +14,7 @@ spoiler: React 프로그래밍 모델의 상세한 설명.
 
 ---
 
-**Note: React를 _배우기 시작한_ 분은 이 글보다는 [React 문서](https://reactjs.org/docs/getting-started.html#learn-react)를 읽으시길 바랍니다.**
+**노트: React를 _배우기 시작한_ 분은 이 글보다는 [React 문서](https://reactjs.org/docs/getting-started.html#learn-react)를 읽으시길 바랍니다.**
 
 <font size="60">⚠️</font>
 
@@ -36,7 +36,7 @@ React 프로그램은 보통 **시간이 지남에 따라 변할 수 있는 트�
 
 그러면 React는 어떨 때 유용할까요? 아주 추상적으로 말하자면, React는 유저 상호작용, 네트워크 응답, 타이머 등의 외부 이벤트가 발생했을 때, 복잡한 호스트 트리를 안정적으로 조작하는 프로그램을 작성할 수 있도록 돕습니다.
 
-전문화된 도구는 특정 제한 속에서, 그리고 그 제한을 활용할 때 일반적인 도구보다 더 잘 동작합니다. React는 다음 두 제한을 주요 원칙으로 삼습니다:
+전문화된 도구는 어떤 가정 아래에서, 그리고 그 가정을 최대한 활용할 때 일반적인 도구보다 더 잘 동작합니다. React는 다음 두 가정을 주요 원칙으로 삼습니다:
 
 - **안정성.** 호스트 트리는 상대적으로 안정적이며, 업데이트 대부분은 트리 전체 구조를 급격하게 바꾸지 않는다. 앱이 모든 요소를 매초마다 뒤죽박죽으로 보여준다면 사람이 사용하기 어려울 것이다. 이 버튼은 어디갔지? 왜 내 화면이 춤추고 있는거야?
 - **규칙성.** 호스트 트리는 무작위한 형태가 아닌, 모양과 행동이 일관적인 UI 패턴(버튼, 목록, 아바타처럼)으로 나눠질 수 있다. 
@@ -45,33 +45,33 @@ React 프로그램은 보통 **시간이 지남에 따라 변할 수 있는 트�
 
 ## 호스트 인스턴스
 
-호스트 트리는 여러 노드로 이뤄져있습니다. 이 노드를 "호스트 인스턴스"라고 부르도록 하죠.
+호스트 트리는 여러 노드로 이뤄져있습니다. 이 노드를 "호스트 인스턴스"라고 부르겠습니다.
 
-DOM 환경의 호스트 인스턴스는 일반적인 DOM 노드입니다. `document.createElement('div')`로 만들어진 객체가 그 예시입니다. On iOS, host instances could be values uniquely identifying a native view from JavaScript.
+DOM 환경의 호스트 인스턴스는 일반적인 DOM 노드입니다. `document.createElement('div')`로 만들어진 객체가 그 예시죠. iOS 환경에서는 JavaScript로부터 생성된 네이티브 뷰를 호스트 인스턴스로 볼 수 있겠네요.
 
-Host instances have their own properties (e.g. `domNode.className` or `view.tintColor`). They may also contain other host instances as children.
+호스트 인스턴스는 각자 자신만의 속성(`domNode.className`이나 `view.tintcolor` 등)을 지닙니다. 다른 호스트 인스턴스를 자식으로 데리고 있을 수도 있고요.
 
-(This has nothing to do with React — I’m describing the host environments.)
+(저는 지금 React와 상관없는, 호스트 환경에 대해 설명하고 있습니다.)
 
-There is usually an API to manipulate host instances. For example, the DOM provides APIs like `appendChild`, `removeChild`, `setAttribute`, and so on. In React apps, you usually don’t call these APIs. That’s the job of React.
+그리고 이런 속성을 제어하는 API도 함께 존재합니다. 예를 들어 DOM은 `appendChild`, `removeChild`, `setAttribute` 같은 API를 제공하는 식이죠. React 앱 안에서는 개발자가 이런 API를 직접 호출할 일이 드뭅니다. 그건 React가 할 일이니까요.
 
-## Renderers
+## 렌더러
 
-A *renderer* teaches React to talk to a specific host environment and manage its host instances. React DOM, React Native, and even [Ink](https://mobile.twitter.com/vadimdemedes/status/1089344289102942211) are React renderers. You can also [create your own React renderer](https://github.com/facebook/react/tree/master/packages/react-reconciler).
+*렌더러*는 React가 특정 호스트의 환경과 인스턴스를 다룰 수 있게 해줍니다. React DOM, React Native, 그리고 [Ink](https://mobile.twitter.com/vadimdemedes/status/1089344289102942211)조차도 React 렌더러입니다. 물론 [당신만의 React 렌더러](https://github.com/facebook/react/tree/master/packages/react-reconciler)를 만들 수도 있죠. *(역자 주: Ink는 CLI용 인터랙티브 앱을 React로 만들 수 있게 해주는 [프로젝트](https://github.com/vadimdemedes/ink/tree/next)입니다.)* 
 
-React renderers can work in one of two modes.
+React 렌더러는 두가지 모드로 동작할 수 있습니다.
 
-The vast majority of renderers are written to use the “mutating” mode. This mode is how the DOM works: we can create a node, set its properties, and later add or remove children from it. The host instances are completely mutable.
+대다수의 렌더러는 "변이mutating" 모드를 사용합니다. DOM도 이 방식으로 동작합니다: 노드 생성, 속성 설정, 자식 노드 삽입 또는 제거. 호스트 인스턴스는 완전히 가변적입니다mutable.
 
-React can also work in a “persistent” mode. This mode is for host environments that don’t provide methods like `appendChild()` but instead clone the parent tree and always replace the top-level child. Immutability on the host tree level makes multi-threading easier. [React Fabric](https://facebook.github.io/react-native/blog/2018/06/14/state-of-react-native-2018) takes advantage of that.
+React에는 "지속persistent" 모드도 있습니다. 이 모드는 `appendChild()`같은 메서드를 제공하지 않는 호스트 환경을 위한 것입니다. 이런 환경에서는 자식을 동적으로 삽입하는 대신, 부모 트리를 복제해서 전체를 교체하는 식으로 동작합니다. 호스트 트리의 불변성immutability은 다중쓰레딩을 적용하기 쉽게 해주죠. [React Fabric](https://facebook.github.io/react-native/blog/2018/06/14/state-of-react-native-2018)이 다중쓰레딩을 잘 활용하는 예입니다.
 
-As a React user, you never need to think about these modes. I only want to highlight that React isn’t just an adapter from one mode to another. Its usefulness is orthogonal to the target low-level view API paradigm.
+사실 React 개발자는 이런 모드에 대해 생각할 필요가 전혀 없습니다. 저는 단지 React가 한 모드에서 다른 모드로 바꿔주는 어댑터 그 이상이라는 걸 강조하고 싶었어요. React는 호스트의 저수준 API 패러다임이 무엇이든 상관없이 유용합니다.
 
-## React Elements
+## React 엘리먼트
 
-In the host environment, a host instance (like a DOM node) is the smallest building block. In React, the smallest building block is a *React element*.
+호스트 인스턴스는 호스트 환경을 이루는 가장 작은 빌딩 블록입니다. DOM 환경의 DOM 노드처럼요. React에서는 *React 엘리먼트*가 가장 작은 빌딩 블록입니다.
 
-A React element is a plain JavaScript object. It can *describe* a host instance.
+React 엘리먼트는 순수한 JavaScript 객체이며, 호스트 인스턴스를 *묘사*하는 역할을 합니다.
 
 ```jsx
 // JSX is a syntax sugar for these objects.
@@ -82,9 +82,9 @@ A React element is a plain JavaScript object. It can *describe* a host instance.
 }
 ```
 
-A React element is lightweight and has no host instance tied to it. Again, it is merely a *description* of what you want to see on the screen.
+React 엘리먼트는 가볍고, 호스트 인스턴스에 종속되지 않습니다. 다시 말하지만, React 엘리먼트는 단지 개발자가 화면에서 보고 싶은 무언가를 *묘사*할 뿐입니다.
 
-Like host instances, React elements can form a tree:
+호스트 인스턴스처럼 React 엘리먼트도 트리를 구성할 수 있습니다:
 
 ```jsx
 // JSX is a syntax sugar for these objects.
@@ -106,13 +106,13 @@ Like host instances, React elements can form a tree:
 }
 ```
 
-*(Note: I omitted [some properties](/why-do-react-elements-have-typeof-property/) that aren’t important to this explanation.)*
+*(노트: 글 진행에 중요하지 않은 [몇몇 속성](/why-do-react-elements-have-typeof-property/)을 의도적으로 생략했습니다.)*
 
-However, remember that **React elements don’t have their own persistent identity.** They’re meant to be re-created and thrown away all the time.
+그러나, 호스트 인스턴스와 달리 **React 엘리먼트는 자신만의 영속적인 아이덴티티persistent identity를 지니고 있지 않습니다.** React 엘리먼트는 매번 버려지고 다시 만들어지도록 디자인되었습니다.
 
-React elements are immutable. For example, you can’t change the children or a property of a React element. If you want to render something different later, you will *describe* it with a new React element tree created from scratch.
+React 엘리먼트는 불변적입니다. 예를 들어, React 엘리먼트의 자식이나 속성은 변경할 수 없습니다. 뭔가 다른 화면을 렌더링하고 싶다면, 그 화면을 *묘사*하는 새로운 React 엘리먼트 트리를 처음부터 만들어야 합니다.
 
-I like to think of React elements as being like frames in a movie. They capture what the UI should look like at a specific point in time. They don’t change.
+저는 React 엘리먼트를 영화 프레임으로 생각하면 편하더군요. UI가 특정 순간에 어떻게 보여야 하는지를 캡처해준 것과 같습니다. 캡처는 변하지 않죠.
 
 ## Entry Point
 
