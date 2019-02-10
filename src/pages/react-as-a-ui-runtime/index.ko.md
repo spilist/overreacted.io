@@ -47,7 +47,7 @@ React 프로그램은 보통 **시간이 지남에 따라 변할 수 있는 트�
 
 호스트 트리는 여러 노드로 이뤄져있습니다. 이 노드를 "호스트 인스턴스"라고 부르겠습니다.
 
-DOM 환경의 호스트 인스턴스는 일반적인 DOM 노드입니다. `document.createElement('div')`로 만들어진 객체가 그 예시죠. iOS 환경에서는 JavaScript로부터 생성된 네이티브 뷰를 호스트 인스턴스로 볼 수 있겠네요.
+DOM 환경의 호스트 인스턴스는 일반적인 DOM 노드입니다. `document.createElement('div')`로 만들어진 오브젝트가 그 예시죠. iOS 환경에서는 JavaScript로부터 생성된 네이티브 뷰를 호스트 인스턴스로 볼 수 있겠네요.
 
 호스트 인스턴스는 각자 자신만의 속성(`domNode.className`이나 `view.tintcolor` 등)을 지닙니다. 다른 호스트 인스턴스를 자식으로 데리고 있을 수도 있고요.
 
@@ -71,10 +71,10 @@ React에는 "지속persistent" 모드도 있습니다. 이 모드는 `appendChil
 
 호스트 인스턴스는 호스트 환경을 이루는 가장 작은 빌딩 블록입니다. DOM 환경의 DOM 노드처럼요. React에서는 *React 엘리먼트*가 가장 작은 빌딩 블록입니다.
 
-React 엘리먼트는 순수한 JavaScript 객체이며, 호스트 인스턴스를 *묘사*하는 역할을 합니다.
+React 엘리먼트는 순수한 JavaScript 오브젝트이며, 호스트 인스턴스를 *묘사*하는 역할을 합니다.
 
 ```jsx
-// JSX is a syntax sugar for these objects.
+// 다음 JSX는 이 오브젝트를 짧게 쓴 것입니다.
 // <button className="blue" />
 {
   type: 'button',
@@ -87,7 +87,7 @@ React 엘리먼트는 가볍고, 호스트 인스턴스에 종속되지 않습�
 호스트 인스턴스처럼 React 엘리먼트도 트리를 구성할 수 있습니다:
 
 ```jsx
-// JSX is a syntax sugar for these objects.
+// 다음 JSX는 이 오브젝트를 짧게 쓴 것입니다.
 // <dialog>
 //   <button className="blue" />
 //   <button className="red" />
@@ -114,11 +114,11 @@ React 엘리먼트는 불변적입니다. 예를 들어, React 엘리먼트의 �
 
 저는 React 엘리먼트를 영화 프레임으로 생각하면 편하더군요. UI가 특정 순간에 어떻게 보여야 하는지를 캡처해준 것과 같습니다. 캡처는 변하지 않죠.
 
-## Entry Point
+## 진입점
 
-Each React renderer has an “entry point”. It’s the API that lets us tell React to render a particular React element tree inside a container host instance.
+각 React 렌더러는 "진입점Entry Point"을 지닙니다. 개발자는 진입점 API를 통해 컨테이너 호스트 인스턴스에 특정 React 엘리먼트 트리를 렌더링할 수 있습니다.
 
-For example, React DOM entry point is `ReactDOM.render`:
+예를 들어 React DOM 렌더러의 진입점은 `ReactDOM.render`입니다:
 
 ```jsx
 ReactDOM.render(
@@ -128,12 +128,12 @@ ReactDOM.render(
 );
 ```
 
-When we say `ReactDOM.render(reactElement, domContainer)`, we mean: **“Dear React, make the `domContainer` host tree match my `reactElement`.”**
+ `ReactDOM.render(reactElement, domContainer)`는 이런 뜻입니다: **“React야, `domContainer` 호스트 트리가 내 `reactElement`에 매칭되게 해주렴.”**
 
-React will look at the `reactElement.type` (in our example, `'button'`) and ask the React DOM renderer to create a host instance for it and set the properties:
+React는 `reactElement.type` (위 예시에서는 `'button'`)을 살펴보고, React DOM 렌더러가 호스트 인스턴스를 만들어서 다음과 같이 인스턴스 속성을 지정합니다:
 
 ```jsx{3,4}
-// Somewhere in the ReactDOM renderer (simplified)
+// ReactDOM 렌더러 어딘가의 소스 코드(생략된 버전)
 function createHostInstance(reactElement) {
   let domNode = document.createElement(reactElement.type);
   domNode.className = reactElement.props.className;
@@ -141,7 +141,7 @@ function createHostInstance(reactElement) {
 }
 ```
 
-In our example, effectively React will do this:
+즉 우리의 예시에서 React가 하는 일은 이렇게 됩니다:
 
 ```jsx{1,2}
 let domNode = document.createElement('button');
@@ -150,7 +150,7 @@ domNode.className = 'blue';
 domContainer.appendChild(domNode);
 ```
 
-If the React element has child elements in `reactElement.props.children`, React will recursively create host instances for them too on the first render.
+React 엘리먼트에 자식이 있으면(`reactElement.props.children`), React는 첫번째 렌더링에서 자식들에 대한 호스트 인스턴스도 재귀적으로 만들어냅니다.
 
 ## Reconciliation
 
