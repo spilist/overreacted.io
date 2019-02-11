@@ -152,9 +152,9 @@ domContainer.appendChild(domNode);
 
 React 엘리먼트에 자식이 있으면(`reactElement.props.children`), React는 첫번째 렌더링에서 자식들에 대한 호스트 인스턴스도 재귀적으로 만들어냅니다.
 
-## Reconciliation
+## 조정
 
-What happens if we call `ReactDOM.render()` twice with the same container?
+같은 컨테이너에 `ReactDOM.render()` 를 두 번 호출하면 무슨 일이 벌어질까요?
 
 ```jsx{2,11}
 ReactDOM.render(
@@ -164,47 +164,47 @@ ReactDOM.render(
 
 // ... later ...
 
-// Should this *replace* the button host instance
-// or merely update a property on an existing one?
+// 버튼은 *교체*될까요?
+// 아니면 기존 버튼의 속성을 업데이트할까요?
 ReactDOM.render(
   <button className="red" />,
   document.getElementById('container')
 );
 ```
 
-Again, React’s job is to *make the host tree match the provided React element tree*. The process of figuring out *what* to do to the host instance tree in response to new information is sometimes called [reconciliation](https://reactjs.org/docs/reconciliation.html).
+다시 강조하자면, React의 역할은 *주어진 React 엘리먼트 트리를 호스트 트리에 매칭*시키는 것입니다. 새로 정보가 주어졌을 때,  호스트 인스턴스 트리에 *어떤* 작업을 해야 하는지 알아내서 수행하는 과정을 [조정reconciliation](https://reactjs.org/docs/reconciliation.html)이라고 부릅니다.
 
-There are two ways to go about it. A simplified version of React could blow away the existing tree and re-create it from scratch:
+조정을 하는 방법은 두 가지입니다. 간단한 방법은 기존의 트리를 다 날려버리고 처음부터 다시 만드는 거죠.
 
 ```jsx
 let domContainer = document.getElementById('container');
-// Clear the tree
+// 트리 삭제
 domContainer.innerHTML = '';
-// Create the new host instance tree
+// 새 호스트 인스턴스 생성
 let domNode = document.createElement('button');
 domNode.className = 'red';
 domContainer.appendChild(domNode);
 ```
 
-But in DOM, this is slow and loses important information like focus, selection, scroll state, and so on. Instead, we want React to do something like this:
+그러나 DOM에서는 이 방법은 느릴뿐 아니라 포커스, 셀렉트 인풋 선택 상태, 스크롤 상태 등 중요한 정보를 다 잃어버리게 만듭니다. 대신 이렇게 해야 합니다:
 
 ```jsx
 let domNode = domContainer.firstChild;
-// Update existing host instance
+// 기존의 호스트 인스턴스를 업데이트
 domNode.className = 'red';
 ```
 
-In other words, React needs to decide when to _update_ an existing host instance to match a new React element, and when to create a _new_ one.
+즉 React는 새 React 엘리먼트를 매칭하기 위해, 언제 기존 호스트 인스턴스를 *업데이트*하고 언제 *새것*을 생성할지 결정해야 합니다.
 
-This raises a question of *identity*. The React element may be different every time, but when does it refer to the same host instance conceptually?
+이로 인해 *동일성* 문제가 제기됩니다. React 엘리먼트는 매번 달라질 수 있는데, 어떨 때 이 엘리먼트들이 같은 호스트 인스턴스를 의미한다고 간주할 수 있을까요?
 
-In our example, it’s simple. We used to render a `<button>` as a first (and only) child, and we want to render a `<button>` in the same place again. We already have a `<button>` host instance there so why re-create it? Let’s just reuse it.
+우리의 예시에서는 간단합니다. `<button>` 은 `document`의 첫 번째이자 유일한 자식이었고, 우리는 `<button>`을 그 위치에 렌더링하고자 합니다. `<button>` 호스트 인스턴스는 이미 있으니 다시 생성할 필요는 없겠죠? 그냥 재사용합시다.
 
-This is pretty close to how React thinks about it.
+사실 이 설명은 React의 실제 동작 방식과 상당히 유사합니다.
 
-**If an element type in the same place in the tree “matches up” between the previous and the next renders, React reuses the existing host instance.**
+**트리의 동일 위치에 존재하는 엘리먼트의 타입이 두 렌더링 사이에 "매칭된다면", React는 기존 호스트 인스턴스를 재사용합니다.**
 
-Here is an example with comments showing roughly what React does:
+다음은 React가 무슨 일을 하는지를 대략적으로 보여주는 예시입니다:
 
 ```jsx{9,10,16,26,27}
 // let domNode = document.createElement('button');
@@ -215,14 +215,14 @@ ReactDOM.render(
   document.getElementById('container')
 );
 
-// Can reuse host instance? Yes! (button → button)
+// 호스트 인스턴스를 재사용할 수 있는가? 그렇다! (button → button)
 // domNode.className = 'red';
 ReactDOM.render(
   <button className="red" />,
   document.getElementById('container')
 );
 
-// Can reuse host instance? No! (button → p)
+// 호스트 인스턴스를 재사용할 수 있는가? 아니다! (button → p)
 // domContainer.removeChild(domNode);
 // domNode = document.createElement('p');
 // domNode.textContent = 'Hello';
@@ -232,7 +232,7 @@ ReactDOM.render(
   document.getElementById('container')
 );
 
-// Can reuse host instance? Yes! (p → p)
+// 호스트 인스턴스를 재사용할 수 있는가? 그렇다! (p → p)
 // domNode.textContent = 'Goodbye';
 ReactDOM.render(
   <p>Goodbye</p>,
@@ -240,7 +240,7 @@ ReactDOM.render(
 );
 ```
 
-The same heuristic is used for child trees. For example, when we update a `<dialog>` with two `<button>`s inside, React first decides whether to re-use the `<dialog>`, and then repeats this decision procedure for each child.
+자식 트리에 대해서도 같은 휴리스틱이 쓰입니다. `<button>` 두 개를 자식으로 가진 `<dialog>`를 업데이트한다고 해보죠. React는 우선 `<dialog>`를 재사용할지 결정한 뒤, 같은 의사결정 과정을 각 자식마다 반복합니다.
 
 ## Conditions
 
