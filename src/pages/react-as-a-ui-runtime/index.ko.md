@@ -215,14 +215,14 @@ ReactDOM.render(
   document.getElementById('container')
 );
 
-// 호스트 인스턴스를 재사용할 수 있는가? 그렇다! (button → button)
+// 호스트 인스턴스 재사용 가능? 그렇다! (button → button)
 // domNode.className = 'red';
 ReactDOM.render(
   <button className="red" />,
   document.getElementById('container')
 );
 
-// 호스트 인스턴스를 재사용할 수 있는가? 아니다! (button → p)
+// 호스트 인스턴스 재사용 가능? 아니다! (button → p)
 // domContainer.removeChild(domNode);
 // domNode = document.createElement('p');
 // domNode.textContent = 'Hello';
@@ -232,7 +232,7 @@ ReactDOM.render(
   document.getElementById('container')
 );
 
-// 호스트 인스턴스를 재사용할 수 있는가? 그렇다! (p → p)
+// 호스트 인스턴스 재사용 가능? 그렇다! (p → p)
 // domNode.textContent = 'Goodbye';
 ReactDOM.render(
   <p>Goodbye</p>,
@@ -242,14 +242,14 @@ ReactDOM.render(
 
 자식 트리에 대해서도 같은 휴리스틱이 쓰입니다. `<button>` 두 개를 자식으로 가진 `<dialog>`를 업데이트한다고 해보죠. React는 우선 `<dialog>`를 재사용할지 결정한 뒤, 같은 의사결정 과정을 각 자식마다 반복합니다.
 
-## Conditions
+## 조건
 
-If React only reuses host instances when the element types “match up” between updates, how can we render conditional content?
+React가 두 업데이트 사이의 엘리먼트 타입이 매칭될 때만 호스트 인스턴스를 재사용한다면, 조건부로 렌더링되는 엘리먼트가 있으면 어떻게 될까요?
 
-Say we want to first show only an input, but later render a message before it:
+처음에는 인풋만 보여주고, 그다음 메시지를 함께 보여주는 예제를 보죠:
 
 ```jsx{12}
-// First render
+// 첫번째 렌더링
 ReactDOM.render(
   <dialog>
     <input />
@@ -257,47 +257,47 @@ ReactDOM.render(
   domContainer
 );
 
-// Next render
+// 다음 렌더링
 ReactDOM.render(
   <dialog>
-    <p>I was just added here!</p>
+    <p>나 방금 생겼음!</p>
     <input />
   </dialog>,
   domContainer
 );
 ```
 
-In this example, the `<input>` host instance would get re-created. React would walk the element tree, comparing it with the previous version:
+이 예제에서 `<input>` 호스트 인스턴스는 재사용되지 않고 새로 만들어집니다. React가 엘리먼트 트리를 타고 들어가 두 버전을 비교할 때 이렇게 하거든요:
 
-* `dialog → dialog`: Can reuse the host instance? **Yes — the type matches.**
-  * `input → p`: Can reuse the host instance? **No, the type has changed!** Need to remove the existing `input` and create a new `p` host instance.
-  * `(nothing) → input`: Need to create a new `input` host instance.
+* `dialog → dialog`: 호스트 인스턴스 재사용 가능? **그렇다 — 타입이 매칭된다.**
+  * `input → p`: 호스트 인스턴스 재사용 가능? **타입이 바뀌었다! 재사용할 수 없다.** 기존 `input`을 삭제하고 새로 `p` 호스트 인스턴스를 만든다.
+  * `(nothing) → input`: 새 `input` 호스트 인스턴스를 만들어야 한다.
 
-So effectively the update code executed by React would be like:
+즉 React는 실질적으로 다음과 같이 작동하게 됩니다:
 
 ```jsx{1,2,8,9}
 let oldInputNode = dialogNode.firstChild;
 dialogNode.removeChild(oldInputNode);
 
 let pNode = document.createElement('p');
-pNode.textContent = 'I was just added here!';
+pNode.textContent = '나 방금 생겼음!';
 dialogNode.appendChild(pNode);
 
 let newInputNode = document.createElement('input');
 dialogNode.appendChild(newInputNode);
 ```
 
-This is not great because *conceptually* the `<input>` hasn’t been *replaced* with `<p>` — it just moved. We don’t want to lose its selection, focus state, and content due to re-creating the DOM.
+이는 당연히 좋지 않은데, *개념상*  `<input>` 이 `<p>`로 *교체*된 게 아니기 때문입니다 — `<input>`은 단지 움직였을 뿐입니다. 우리는 DOM 재생성으로 인해 포커스 상태나 인풋 내용을 잃는 것은 원치 않습니다.
 
-While this problem has an easy fix (which we’ll get to in a minute), it doesn’t occur often in the React applications. It’s interesting to see why.
+이 문제를 해결하는 것이 어렵진 않지만(곧 보여드릴 텐데), 사실 React 앱에서 이런 일이 자주 발생하지는 않습니다. 왜 그런지 살펴볼까요?
 
-In practice, you would rarely call `ReactDOM.render` directly. Instead, React apps tend to be broken down into functions like this:
+실무에서 개발자가 `ReactDOM.render` 를 직접 호출할 일은 아주 드뭅니다. 대신 React 앱은 다음과 같이 여러 함수로 쪼개져있기 마련이죠:
 
 ```jsx
 function Form({ showMessage }) {
   let message = null;
   if (showMessage) {
-    message = <p>I was just added here!</p>;
+    message = <p>나 방금 생겼음!</p>;
   }
   return (
     <dialog>
@@ -308,7 +308,7 @@ function Form({ showMessage }) {
 }
 ```
 
-This example doesn’t suffer from the problem we just described. It might be easier to see why if we use object notation instead of JSX. Look at the `dialog` child element tree:
+이 예제에는 우리가 겪었던 문제가 없습니다. JSX 대신 오브젝트 표현을 쓰면 좀 더 이해가 쉬워질 텐데요. `dialog`의 자식 엘리먼트 트리를 봅시다:
 
 ```jsx{12-15}
 function Form({ showMessage }) {
@@ -316,7 +316,7 @@ function Form({ showMessage }) {
   if (showMessage) {
     message = {
       type: 'p',
-      props: { children: 'I was just added here!' }
+      props: { children: '나 방금 생겼음!' }
     };
   }
   return {
@@ -331,24 +331,24 @@ function Form({ showMessage }) {
 }
 ```
 
-**Regardless of whether `showMessage` is `true` or `false`, the `<input>` is the second child and doesn’t change its tree position between renders.**
+**`showMessage`가 `true`든 `false`든 간에, `<input>`은 두 번째에 위치한 자식이며, 따라서 렌더링 사이에 트리에서의 위치가 변하지 않습니다.**
 
-If `showMessage` changes from `false` to `true`, React would walk the element tree, comparing it with the previous version:
+`showMessage`가 `false`에서 `true`로 변하면 React는 엘리먼트 트리를 타고 들어가 이전 버전과 비교합니다:
 
-* `dialog → dialog`: Can reuse the host instance? **Yes — the type matches.**
-  * `(null) → p`: Need to insert a new `p` host instance.
-  * `input → input`: Can reuse the host instance? **Yes — the type matches.**
+* `dialog → dialog`: 호스트 인스턴스 재사용 가능? **그렇다 — 타입이 매칭된다.**
+  * `(null) → p`: 새로운 `p` 호스트 인스턴스를 삽입해야 한다.
+  * `input → input`: 호스트 인스턴스 재사용 가능? **그렇다 — 타입이 매칭된다.**
 
-And the code executed by React would be similar to this:
+그리고 React는 이런 식으로 작동하게 됩니다:
 
 ```jsx
 let inputNode = dialogNode.firstChild;
 let pNode = document.createElement('p');
-pNode.textContent = 'I was just added here!';
+pNode.textContent = '나 방금 생겼음!';
 dialogNode.insertBefore(pNode, inputNode);
 ```
 
-No input state is lost now.
+인풋 상태는 모두 보존됩니다.
 
 ## Lists
 
@@ -422,7 +422,7 @@ We’ve already seen functions that return React elements:
 function Form({ showMessage }) {
   let message = null;
   if (showMessage) {
-    message = <p>I was just added here!</p>;
+    message = <p>나 방금 생겼음!</p>;
   }
   return (
     <dialog>
