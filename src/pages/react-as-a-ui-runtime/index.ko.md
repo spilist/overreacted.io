@@ -414,9 +414,9 @@ Note that the `key` is only relevant within a particular parent React element, s
 
 What’s a good value for a `key`? An easy way to answer this is to ask: **when would _you_ say an item is the “same” even if the order changed?** For example, in our shopping list, the product ID uniquely identifies it between siblings.
 
-## Components
+## 컴포넌트
 
-We’ve already seen functions that return React elements:
+함수를 리턴하는 React 엘리먼트는 여러 번 보여드렸죠:
 
 ```jsx
 function Form({ showMessage }) {
@@ -433,9 +433,9 @@ function Form({ showMessage }) {
 }
 ```
 
-They are called *components*. They let us create our own “toolbox” of buttons, avatars, comments, and so on. Components are the bread and butter of React.
+이를 *컴포넌트*라고 부릅니다. 컴포넌트는 개발자만의 버튼, 아바타, 코멘트 등을 만들 수 있게 해주는 연장통입니다. 컴포넌트야말로 React의 핵심입니다.
 
-Components take one argument — an object hash. It contains “props” (short for “properties”). Here, `showMessage` is a prop. They’re like named arguments.
+컴포넌트는 오브젝트 해시 하나만을 인자로 받습니다. 이 오브젝트는 "props"를 지니고 있고요. ("properties"의 약자입니다.) 위 예시에서는 `showMessage`가 prop 중 하나입니다. 명명된 인자named arguments와 유사하다고 볼 수 있죠.
 
 ## Purity
 
