@@ -350,13 +350,13 @@ dialogNode.insertBefore(pNode, inputNode);
 
 인풋 상태는 모두 보존됩니다.
 
-## Lists
+## 리스트
 
-Comparing the element type at the same position in the tree is usually enough to decide whether reuse or re-create the corresponding host instance.
+호스트 인스턴스를 재사용할지 재생성할지 결정할 때, 대개 트리에서 같은 위치에 있는 엘리먼트 타입을 비교하는 것만으로도 충분합니다.
 
-But this only works well if children positions are static and don’t re-order. In our example above, even though `message` could be a “hole”, we still knew that there the input goes after the message, and there are no other children.
+이는 자식들의 위치가 정적이며 변경되지 않을 때만 제대로 작동합니다. 위 예시에서, 우리는 `message`가 "구멍"이 될 수 있더라도 여전히 인풋이 메시지 뒤에 위치하며 다른 자식이 없다는 걸 알고 있습니다.
 
-With dynamic lists, we can’t be sure the order is ever the same:
+그러나 동적인 리스트에서는 위치의 순서를 보장할 수 없습니다:
 
 ```jsx
 function ShoppingList({ list }) {
@@ -364,9 +364,9 @@ function ShoppingList({ list }) {
     <form>
       {list.map(item => (
         <p>
-          You bought {item.name}
+          구매 대상: {item.name}
           <br />
-          Enter how many do you want: <input />
+          구매 수량: <input />
         </p>
       ))}
     </form>
@@ -374,21 +374,21 @@ function ShoppingList({ list }) {
 }
 ```
 
-If the `list` of our shopping items is ever re-ordered, React will see that all `p` and `input` elements inside have the same type, and won’t know to move them. (From React’s point of view, the *items themselves* changed, not their order.)
+쇼핑 물품 `list`의 정렬 순서가 변경되더라도, React는 모든 `p`와 `input` 엘리먼트가 같은 타입을 가졌기 때문에 움직였다는 사실을 알 수 없습니다. (React의 관점에서는 *item 자체*는 변했으나 순서는 변하지 않은 셈이죠.)
 
-The code executed by React to re-order 10 items would be something like:
+React에서 실제 실행되는 코드는 대략 이렇습니다:
 
 ```jsx
 for (let i = 0; i < 10; i++) {
   let pNode = formNode.childNodes[i];
   let textNode = pNode.firstChild;
-  textNode.textContent = 'You bought ' + items[i].name;
+  textNode.textContent = '구매 대상 ' + items[i].name;
 }
 ```
 
-So instead of *re-ordering* them, React would effectively *update* each of them. This can create performance issues and possible bugs. For example, the content of the first input would stay reflected in first input *after* the sort — even though conceptually they might refer to different products in your shopping list!
+즉 React는 각 쇼핑 물품을 *재배열*하는 대신 *업데이트*합니다. 이는 성능 문제는 물론 버그도 야기할 가능성이 있는데, 예를 들어 첫번째 인풋에 입력해둔 내용이 순서 변경 *이후*에도 그자리에 남아있을 수 있습니다.
 
-**This is why React nags you to specify a special property called `key` every time you include an array of elements in your output:**
+**이게 바로 개발자가 엘리먼트의 배열을 렌더링할 때, `key` 속성을 명시하라고 React가 항상 징징대는 이유입니다.**
 
 ```jsx{5}
 function ShoppingList({ list }) {
@@ -396,9 +396,9 @@ function ShoppingList({ list }) {
     <form>
       {list.map(item => (
         <p key={item.productId}>
-          You bought {item.name}
+          구매 대상: {item.name}
           <br />
-          Enter how many do you want: <input />
+          구매 수량: <input />
         </p>
       ))}
     </form>
@@ -406,17 +406,17 @@ function ShoppingList({ list }) {
 }
 ```
 
-A `key` tells React that it should consider an item to be *conceptually* the same even if it has different *positions* inside its parent element between renders.
+어떤 엘리먼트의 위치가 렌더링 사이에 달라졌더라도, `key`가 같다면 React는 *개념적으로* 같은 엘리먼트로 판단합니다.
 
-When React sees `<p key="42">` inside a `<form>`, it will check if the previous render also contained `<p key="42">` inside the same `<form>`. This works even if `<form>` children changed their order. React will reuse the previous host instance with the same key if it exists, and re-order the siblings accordingly.
+React가 `<form>` 안에서 `<p key="42">`를 발견하면, React는 이전 렌더링에서 같은 `<form>` 안에 `<p key="42">`가 있었는지 확인합니다. `<form>`의 자식들 사이에 순서가 바뀌었더라도요. 같은 키의 호스트 인스턴스가 존재하면 React는 그 인스턴스를 재사용하고, 그에 따라 자식들을 재배열합니다.
 
-Note that the `key` is only relevant within a particular parent React element, such as a `<form>`. React won’t try to “match up” elements with the same keys between different parents. (React doesn’t have idiomatic support for moving a host instance between different parents without re-creating it.)
+`key`는 위 예시에서의 `<form>`처럼, 동일 부모를 가진 React 엘리먼트 사이에서만 판단의 기준이 된다는 것을 기억하세요. 부모가 다르면 React는 같은 키를 가진 엘리먼트끼리의 "매칭"을 시도하지 않습니다. (React에서는 호스트 인스턴스를 다시 만드는 것이 인스턴스를 다른 부모로 이동시키는 유일한 방법입니다.)
 
-What’s a good value for a `key`? An easy way to answer this is to ask: **when would _you_ say an item is the “same” even if the order changed?** For example, in our shopping list, the product ID uniquely identifies it between siblings.
+`key`로는 어떤 값이 적절할까요? 간단한 답은: **순서가 바뀌더라도 아이템이 "같음"을 보장하려면 어떤 정보를 살펴봐야 하는가?** 입니다. 예를 들어 쇼핑 목록에서는 상품의 ID가 형제 엘리먼트들 사이에서의 유일성을 보장하는 구분자가 되겠죠.
 
 ## 컴포넌트
 
-함수를 리턴하는 React 엘리먼트는 여러 번 보여드렸죠:
+함수를 리턴하는 React 엘리먼트는, 몇번 보셨다시피 이렇게 생겼습니다:
 
 ```jsx
 function Form({ showMessage }) {
