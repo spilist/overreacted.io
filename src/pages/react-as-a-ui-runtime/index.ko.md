@@ -437,20 +437,20 @@ function Form({ showMessage }) {
 
 컴포넌트는 오브젝트 해시 하나만을 인자로 받습니다. 이 오브젝트는 "props"를 지니고 있고요. ("properties"의 약자입니다.) 위 예시에서는 `showMessage`가 prop 중 하나입니다. 명명된 인자named arguments와 유사하다고 볼 수 있죠.
 
-## Purity
+## 순수성
 
-React components are assumed to be pure with respect to their props.
+React 컴포넌트는 props에 대한 순수 함수로 간주됩니다.
 
 ```jsx
 function Button(props) {
-  // 🔴 Doesn't work
+  // 🔴 이렇게는 쓸 수 없습니다.
   props.isActive = true;
 }
 ```
 
-In general, mutation is not idiomatic in React. (We’ll talk more about the idiomatic way to update the UI in response to events later.)
+React에서는 일반적으로 변이가 잘 사용되지 않습니다. (이벤트에 반응하여 UI를 업데이트하는 방법에 대해서는 조금 있다가 설명하도록 하죠.)
 
-However, *local mutation* is absolutely fine:
+하지만 *지역적 변이(local mutation)*는 전혀 문제 없습니다:
 
 ```jsx{2,5}
 function FriendList({ friends }) {
@@ -465,22 +465,22 @@ function FriendList({ friends }) {
 }
 ```
 
-We created `items` *while rendering* and no other component “saw” it so we can mutate it as much as we like before handing it off as part of the render result. There is no need to contort your code to avoid local mutation.
+`items`는 *렌더링 도중*에 만들어졌고, 다른 컴포넌트는 `items`를 "볼" 수 없으므로, 렌더링 결과로 UI에 전달하기 전에 얼마든지 변경할 수 있습니다. 지역적 변이를 피하기 위해 코드를 뒤틀 필요는 없습니다.
 
-Similarly, lazy initialization is fine despite not being fully “pure”:
+비슷하게, 완전히 "순수"하지는 않지만 지연된 초기화도 괜찮습니다:
 
 ```jsx
 function ExpenseForm() {
-  // Fine if it doesn't affect other components:
+  // 다른 컴포넌트에 영향을 미치지만 않는다면 괜찮습니다:
   SuperCalculator.initializeIfNotReady();
 
-  // Continue rendering...
+  // 렌더링을 계속합니다...
 }
 ```
 
-As long as calling a component multiple times is safe and doesn’t affect rendering of other components, React doesn’t care if it’s 100% pure in the strict FP sense of the word. [Idempotence](https://stackoverflow.com/questions/1077412/what-is-an-idempotent-operation) is more important to React than purity.
+컴포넌트를 여러 번 불러도 안전하고, 다른 컴포넌트의 렌더링에 영향을 미치지 않는다면, React는 엄격한 함수형 프로그래밍의 관점에서 컴포넌트가 100% 순수한지 아닌지는 신경쓰지 않습니다. React에서는 [멱등성](https://stackoverflow.com/questions/1077412/what-is-an-idempotent-operation)이 순수성보다 더 중요하죠. *(역자 주: 함수의 멱등성은 같은 인자로 함수를 여러 번 호출하더라도, 첫 번째 호출한 것과 같은 결과를 반환하는 성질입니다.)* 
 
-That said, side effects that are directly visible to the user are not allowed in React components. In other words, merely *calling* a component function shouldn’t by itself produce a change on the screen.
+즉 사용자에게 직접 노출되는 사이드 이펙트는 React 컴포넌트 안에서 발생하면 안 됩니다. 다른 말로 하면, 단순히 컴포넌트 함수를 *호출*하는 것만으로 스크린에 어떤 변화가 생겨서는 안 됩니다.
 
 ## Recursion
 
