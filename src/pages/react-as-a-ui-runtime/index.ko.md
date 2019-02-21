@@ -482,18 +482,18 @@ function ExpenseForm() {
 
 즉 사용자에게 직접 노출되는 사이드 이펙트는 React 컴포넌트 안에서 발생하면 안 됩니다. 다른 말로 하면, 단순히 컴포넌트 함수를 *호출*하는 것만으로 스크린에 어떤 변화가 생겨서는 안 됩니다.
 
-## Recursion
+## 재귀
 
-How do we *use* components from other components? Components are functions so we *could* call them:
+컴포넌트는 함수이므로, 한 컴포넌트가 다른 컴포넌트를 *사용*하려면 함수 부르듯 *호출*하면 되겠죠?: 
 
 ```jsx
 let reactElement = Form({ showMessage: true });
 ReactDOM.render(reactElement, domContainer);
 ```
 
-However, this is *not* the idiomatic way to use components in the React runtime.
+하지만 실제로는 React 런타임에서 이런 방식으로 컴포넌트가 사용되지는 않습니다.
 
-Instead, the idiomatic way to use a component is with the same mechanism we’ve already seen before — React elements. **This means that you don’t directly call the component function, but instead let React later do it for you**:
+React가 컴포넌트를 사용하는 메커니즘은 React 엘리먼트를 사용하는 메커니즘과 같습니다. **즉, 개발자가 컴포넌트 함수를 직접 호출하는 대신, React가 알아서 하게 하는 방식이죠:**
 
 ```jsx
 // { type: Form, props: { showMessage: true } }
@@ -501,23 +501,23 @@ let reactElement = <Form showMessage={true} />;
 ReactDOM.render(reactElement, domContainer);
 ```
 
-And somewhere inside React, your component will be called:
+React 안 어딘가에서는 이런 식으로 컴포넌트가 호출됩니다:
 
 ```jsx
-// Somewhere inside React
+// React 안 어딘가
 let type = reactElement.type; // Form
 let props = reactElement.props; // { showMessage: true }
-let result = type(props); // Whatever Form returns
+let result = type(props); // Form의 반환값
 ```
 
-Component function names are by convention capitalized. When the JSX transform sees `<Form>` rather than `<form>`, it makes the object `type` itself an identifier rather than a string:
+컴포넌트 함수의 이름은 첫 자를 대문자로 쓰는 것이 관행입니다. JSX가 html 문법을 변환할 때 `<form>`이 아닌 `<Form>` 을 만나면, 오브젝트의 `type`을 단순한 문자열이 아닌 구분자identifier로 만듭니다.:
 
 ```jsx
-console.log(<form />.type); // 'form' string
-console.log(<Form />.type); // Form function
+console.log(<form />.type); // 'form' 문자열
+console.log(<Form />.type); // Form 함수
 ```
 
-There is no global registration mechanism — we literally refer to `Form` by name when typing `<Form />`. If `Form` doesn’t exist in local scope, you’ll see a JavaScript error just like you normally would with a bad variable name.
+거창한 전역 등록 메커니즘 같은 건 없습니다. React는 문자 그대로 `<Form />`을 `Form`이란 이름을 이용해 참조합니다. `Form`이 지역 스코프에 존재하지 않는다면, 개발자는 변수 이름을 잘못썼을 때처럼 자바스크립트 에러를 보게 되죠.
 
 **Okay, so what does React do when an element type is a function? It calls your component, and asks what element _that_ component wants to render.**
 
