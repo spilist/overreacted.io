@@ -510,32 +510,32 @@ let props = reactElement.props; // { showMessage: true }
 let result = type(props); // Form의 반환값
 ```
 
-컴포넌트 함수의 이름은 첫 자를 대문자로 쓰는 것이 관행입니다. JSX가 html 문법을 변환할 때 `<form>`이 아닌 `<Form>` 을 만나면, 오브젝트의 `type`을 단순한 문자열이 아닌 구분자identifier로 만듭니다.:
+컴포넌트 함수의 이름은 첫 자를 대문자로 쓰는 것이 관행입니다. JSX가 html 문법을 변환할 때 `<form>`이 아닌 `<Form>` 을 만나면, 오브젝트의 `type`을 단순한 문자열이 아닌 구분자로 만듭니다.:
 
 ```jsx
 console.log(<form />.type); // 'form' 문자열
 console.log(<Form />.type); // Form 함수
 ```
 
-거창한 전역 등록 메커니즘 같은 건 없습니다. React는 문자 그대로 `<Form />`을 `Form`이란 이름을 이용해 참조합니다. `Form`이 지역 스코프에 존재하지 않는다면, 개발자는 변수 이름을 잘못썼을 때처럼 자바스크립트 에러를 보게 되죠.
+거창한 전역 등록 메커니즘 같은 건 없습니다. React는 문자 그대로 `<Form />`을 `Form`이란 이름을 이용해 참조합니다. `Form`이 지역 스코프에 존재하지 않는다면, 개발자는 변수 이름을 잘못썼을 때처럼 자바스크립트 에러를 보게 됩니다.
 
-**Okay, so what does React do when an element type is a function? It calls your component, and asks what element _that_ component wants to render.**
+**그러면 엘리먼트의 타입이 함수일 때 React가 하는 일은 무엇일까요? React는 컴포넌트를 호출해서, _그 컴포넌트가_ 무엇을 렌더링하길 원하는지 묻습니다.**
 
-This process continues recursively, and is described in more detail [here](https://reactjs.org/blog/2015/12/18/react-components-elements-and-instances.html). In short, it looks like this:
+이 프로세스는 재귀적으로 반복됩니다. 자세한 설명은 이 [링크](https://reactjs.org/blog/2015/12/18/react-components-elements-and-instances.html)를 참조하세요. 간단하게는 이런 식으로 진행됩니다:
 
-- **You:** `ReactDOM.render(<App />, domContainer)`
-- **React:** Hey `App`, what do you render to?
-  - `App`: I render `<Layout>` with `<Content>` inside.
-- **React:** Hey `Layout`, what do you render to?
-  - `Layout`: I render my children in a `<div>`. My child was `<Content>` so I guess that goes into the `<div>`.
-- **React:** Hey `<Content>`, what do you render to?
-  - `Content`: I render an `<article>` with some text and a `<Footer>` inside.
-- **React:** Hey `<Footer>`, what do you render to?
-  - `Footer`: I render a `<footer>` with some more text.
-- **React:** Okay, here you go:
+- **개발자:** `ReactDOM.render(<App />, domContainer)`
+- **React:** 이봐 `App`, 렌더링하고 싶은 게 뭐야?
+  - `App`: 나는 `<Layout>` 안에 `<Content>`를 렌더링하고 싶어.
+- **React:** 이봐 `Layout`, 렌더링하고 싶은 게 뭐야?
+  - `Layout`: 난 `<div>` 안에 내 자식들을 렌더링하고 싶어. 내 자식이 `<Content>`였으니, 그게 `<div>` 안에 들어갈 거야.
+- **React:** 이봐 `<Content>`, 렌더링하고 싶은 게 뭐야?
+  - `Content`: 난 `<article>`  안에 텍스트 조금이랑 `<Footer>`를 렌더링할래.
+- **React:** 이봐 `<Footer>`, 렌더링하고 싶은 게 뭐야?
+  - `Footer`: 나는 `<footer>` 안에 텍스트를 렌더링할거야.
+- **React:** 좋아, 결과물은 이거야:
 
 ```jsx
-// Resulting DOM structure
+// DOM 구조물 결과
 <div>
   <article>
     Some text
@@ -544,9 +544,9 @@ This process continues recursively, and is described in more detail [here](https
 </div>
 ```
 
-This is why we say reconciliation is recursive. When React walks the element tree, it might meet an element whose `type` is a component. It will call it and keep descending down the tree of returned React elements. Eventually we’ll run out of components, and React will know what to change in the host tree.
+이것이 조정reconciliation 과정이 재귀적이라고 표현하는 이유입니다. React가 엘리먼트 트리를 지나가면서 `타입`이 컴포넌트인 엘리먼트를 만나면, 컴포넌트 함수를 호출한 다음 반환된 React 엘리먼트의 트리로 다시 탐색해 들어갑니다. 트리에 컴포넌트가 하나도 남지 않으면 이제 React는 호스트 트리를 어떻게 바꿔야 할지 알게 되는 것이죠.
 
-The same reconciliation rules we already discussed apply here too. If the `type` at the same position (as determined by index and optional `key`) changes, React will throw away the host instances inside, and re-create them.
+이러한 조정 규칙이 여기서도 적용됩니다. (자식들 사이에서의 순서와 `key`로 판단된) 위치가 같은데 `type`이 다르면, React는 호스트 인스턴스를 삭제하고 다시 생성합니다.
 
 ## Inversion of Control
 
