@@ -548,33 +548,31 @@ console.log(<Form />.type); // Form 함수
 
 이러한 조정 규칙이 여기서도 적용됩니다. (자식들 사이에서의 순서와 `key`로 판단된) 위치가 같은데 `type`이 다르면, React는 호스트 인스턴스를 삭제하고 다시 생성합니다.
 
-## Inversion of Control
+## 제어 역전
 
-You might be wondering: why don’t we just call components directly? Why write `<Form />` rather than `Form()`?
+이쯤에서 한 가지 의문이 생길지도 모르겠네요. 왜 컴포넌트를 직접 호출하지 않는 걸까? 왜 `Form()`이 아니라 `<Form />`이라고 쓰는 걸까?
 
-**React can do its job better if it “knows” about your components rather than if it only sees the React element tree after recursively calling them.**
+**컴포넌트에 대해 좀 더 일찍 "알게" 되면 React가 좀 더 일을 효율적으로 할 수 있기 때문입니다. (함수를 재귀적으로 호출한 뒤에야 React 엘리먼트 트리에 대해 알게 되는 것과 비교해서요.) **
 
 ```jsx
-// 🔴 React has no idea Layout and Article exist.
-// You're calling them.
+// 🔴 개발자가 직접 호출하면, React는 Layout과 Article의 존재 여부를 알 수 없습니다.
 ReactDOM.render(
   Layout({ children: Article() }),
   domContainer
 )
 
-// ✅ React knows Layout and Article exist.
-// React calls them.
+// ✅ React가 호출하면, Layout과 Article이 존재함을 React가 알 수 있습니다.
 ReactDOM.render(
   <Layout><Article /></Layout>,
   domContainer
 )
 ```
 
-This is a classic example of [inversion of control](https://en.wikipedia.org/wiki/Inversion_of_control). There’s a few interesting properties we get by letting React take control of calling our components:
+이는 [제어 역전inversion of control](https://en.wikipedia.org/wiki/Inversion_of_control)의 전형적인 예입니다. React에게 컴포넌트 호출의 역할을 넘김으로써 우리가 얻을 수 있는 몇 가지 흥미로운 점은:
 
-* **Components become more than functions.** React can augment component functions with features like *local state* that are tied to the component identity in the tree. A good runtime provides fundamental abstractions that match the problem at hand. As we already mentioned, React is oriented specifically at programs that render UI trees and respond to interactions. If you called components directly, you’d have to build these features yourself.
+* **컴포넌트가 단순한 함수 그 이상이 됩니다.** React는 컴포넌트 함수에 *지역 상태local state* 와 같은 기능을 붙일 수 있습니다. 좋은 런타임은 그 런타임의 사용자가 직면할 만한 문제에 맞는 기본적인 추상화를 제공해야 합니다. 이미 설명했듯, React는 UI 트리를 렌더링하고 사용자 인터랙션에 반응하는 프로그램에 특화된 런타임입니다. 컴포넌트를 개발자가 직접 호출한다면 이런 기능도 직접 구축해야 합니다.
 
-* **Component types participate in the reconciliation.** By letting React call your components, you also tell it more about the conceptual structure of your tree. For example, when you move from rendering `<Feed>` to the `<Profile>` page, React won’t attempt to re-use host instances inside them — just like when you replace `<button>` with a `<p>`. All state will be gone — which is usually good when you render a conceptually different view. You wouldn't want to preserve input state between `<PasswordForm>` and `<MessengerChat>` even if the `<input>` position in the tree accidentally “lines up” between them.
+* **컴포넌트 타입을 조정에 이용할 수 있습니다.** React가 컴포넌트 호출을 하게 함으로써, 개발자는 트리의 개념적 구조에 대해 React에게 더 알려줄 수 있습니다. 예를 들어, `<Feed>`를 렌더링하는 페이지에서 `<Profile>`을 렌더링하는 페이지로 이동했다고 해봅시다. React는 이 컴포넌트들 내부에 있는 호스트 인스턴스를 재사용하려고 하지 않습니다. `<button>`이 `<p>`로 바뀌었을 때처럼 말이죠. 모든 상태는 초기화될텐데, 개발자가 다른 뷰를 렌더링하는 상황이기 때문에 이는 대체로 옳은 선택입니다. 트리 안에서 `<input>`의 위치가 우연히 일치하더라도, `<PasswordForm>`과 `<MessengerChat>` 사이에서 인풋 입력이 보존되길 원하진 않을 테니까요.
 
 * **React can delay the reconciliation.** If React takes control over calling our components, it can do many interesting things. For example, it can let the browser do some work between the component calls so that re-rendering a large component tree [doesn’t block the main thread](https://reactjs.org/blog/2018/03/01/sneak-peek-beyond-react-16.html). Orchestrating this manually without reimplementing a large part of React is difficult.
 
