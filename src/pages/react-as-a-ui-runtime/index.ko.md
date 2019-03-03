@@ -574,11 +574,11 @@ ReactDOM.render(
 
 * **컴포넌트 타입을 조정에 이용할 수 있습니다.** React가 컴포넌트 호출을 하게 함으로써, 개발자는 트리의 개념적 구조에 대해 React에게 더 알려줄 수 있습니다. 예를 들어, `<Feed>`를 렌더링하는 페이지에서 `<Profile>`을 렌더링하는 페이지로 이동했다고 해봅시다. React는 이 컴포넌트들 내부에 있는 호스트 인스턴스를 재사용하려고 하지 않습니다. `<button>`이 `<p>`로 바뀌었을 때처럼 말이죠. 모든 상태는 초기화될텐데, 개발자가 다른 뷰를 렌더링하는 상황이기 때문에 이는 대체로 옳은 선택입니다. 트리 안에서 `<input>`의 위치가 우연히 일치하더라도, `<PasswordForm>`과 `<MessengerChat>` 사이에서 인풋 입력이 보존되길 원하진 않을 테니까요.
 
-* **React can delay the reconciliation.** If React takes control over calling our components, it can do many interesting things. For example, it can let the browser do some work between the component calls so that re-rendering a large component tree [doesn’t block the main thread](https://reactjs.org/blog/2018/03/01/sneak-peek-beyond-react-16.html). Orchestrating this manually without reimplementing a large part of React is difficult.
+* **조정을 미룰 수 있습니다.** React가 컴포넌트 호출을 맡으면 여러 흥미로운 일을 할 수 있습니다. 예를 들면, 컴포넌트 호출과 호출 사이에 브라우저가 몇 가지 작업을 할 수 있게 함으로써, 거대한 컴포넌트 트리의 리렌더링이 [메인 쓰레드를 멈추지 않게](https://reactjs.org/blog/2018/03/01/sneak-peek-beyond-react-16.html) 할 수 있습니다. React를 여러 군데 재작성하지 않는 한, 이를 개발자가 직접 하는 건 무척 어렵습니다.
 
-* **A better debugging story.** If components are first-class citizens that the library is aware of, we can build [rich developer tools](https://github.com/facebook/react-devtools) for introspection in development.
+* **디버깅이 더 편해집니다.** React가 컴포넌트를 일급 객체first-class citizens로 인지할 수 있으면, [풍부한 개발자 도구](https://github.com/facebook/react-devtools)를 만들어낼 수 있습니다.
 
-The last benefit to React calling your component functions is *lazy evaluation*. Let’s see what this means.
+React가 컴포넌트 함수를 호출하게 할 때의 마지막 이득은 *지연 연산lazy evaluation*입니다. 이게 무슨 뜻인지 알아보시죠.
 
 ## Lazy Evaluation
 
