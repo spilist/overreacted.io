@@ -580,23 +580,23 @@ ReactDOM.render(
 
 React가 컴포넌트 함수를 호출하게 할 때의 마지막 이득은 *지연 연산lazy evaluation*입니다. 이게 무슨 뜻인지 알아보시죠.
 
-## Lazy Evaluation
+## 지연 연산
 
-When we call functions in JavaScript, arguments are evaluated before the call:
+자바스크립트에서 함수를 호출하면 매개변수가 먼저 연산됩니다:
 
 ```jsx
-// (2) This gets computed second
+// (2) 나중에 연산됨
 eat(
-  // (1) This gets computed first
+  // (1) 먼저 연산됨
   prepareMeal()
 );
 ```
 
-This is usually what JavaScript developers expect because JavaScript functions can have implicit side effects. It would be surprising if we called a function, but it wouldn’t execute until its result gets somehow “used” in JavaScript.
+이는 자바스크립트 개발자에게 자연스러운 것인데, 자바스크립트 함수가 암시적인 사이드 이펙트를 가질 수 있기 때문입니다. 자바스크립트 세계에서, 함수를 호출했는데 그 결과가 실제로 "사용"되기 전까지 함수 실행이 되지 않는다면 놀라겠죠.
 
-However, React components are [relatively](#purity) pure. There is absolutely no need to execute it if we know its result won’t get rendered on the screen.
+그러나 React 컴포넌트는 [상대적으로](#purity) 순수합니다. 결과물이 화면에 렌더링되지 않는다면, 미리 실행할 필요가 전혀 없습니다.
 
-Consider this component putting `<Comments>` inside a `<Page>`:
+`<Comments>`를 `<Page>` 안에 렌더링하는 컴포넌트의 예를 보시죠:
 
 ```jsx{11}
 function Story({ currentUser }) {
@@ -615,7 +615,7 @@ function Story({ currentUser }) {
 }
 ```
 
-The `Page` component can render the children given to it inside some `Layout`:
+`Page` 컴포넌트는 `Layout` 안에 자식들을 렌더링할 수 있습니다:
 
 ```jsx{4}
 function Page({ currentUser, children }) {
@@ -627,14 +627,14 @@ function Page({ currentUser, children }) {
 }
 ```
 
-*(`<A><B /></A>` in JSX is the same as `<A children={<B />} />`.)*
+*(JSX에서 `<A><B /></A>` 는 `<A children={<B />} />`와 같습니다.)*
 
-But what if it has an early exit condition?
+그런데 `Page`가 이른 반환early exit 조건을 가지면 어떻게 될까요?
 
 ```jsx{2-4}
 function Page({ currentUser, children }) {
   if (!currentUser.isLoggedIn) {
-    return <h1>Please login</h1>;
+    return <h1>로그인이 필요합니다</h1>;
   }
   return (
     <Layout>
@@ -644,13 +644,13 @@ function Page({ currentUser, children }) {
 }
 ```
 
-If we called `Comments()` as a function, it would execute immediately regardless of whether `Page` wants to render them or not:
+우리가 `Comments()`를 함수로서 호출했다면, `Page`가 렌더링되는지 여부와 상관없이 바로 실행될 것입니다:
 
 ```jsx{4,8}
 // {
 //   type: Page,
 //   props: {
-//     children: Comments() // Always runs!
+//     children: Comments() // 언제나 실행됩니다!
 //   }
 // }
 <Page>
@@ -658,7 +658,7 @@ If we called `Comments()` as a function, it would execute immediately regardless
 </Page>
 ```
 
-But if we pass a React element, we don’t execute `Comments` ourselves at all:
+하지만 우리가 React 엘리먼트를 넘겨주면, `Comments`는 실행되지 않습니다:
 
 ```jsx{4,8}
 // {
@@ -673,7 +673,7 @@ But if we pass a React element, we don’t execute `Comments` ourselves at all:
 ```
 
 This lets React decide when and *whether* to call it. If our `Page` component ignores its `children` prop and renders
-`<h1>Please login</h1>` instead, React won’t even attempt to call the `Comments` function. What’s the point?
+`<h1>로그인이 필요합니다</h1>` instead, React won’t even attempt to call the `Comments` function. What’s the point?
 
 This is good because it both lets us avoid unnecessary rendering work that would be thrown away, and makes the code less fragile. (We don’t care if `Comments` throws or not when the user is logged out — it won’t be called.)
 
