@@ -594,7 +594,7 @@ eat(
 
 이는 자바스크립트 개발자에게 자연스러운 것인데, 자바스크립트 함수가 암시적인 사이드 이펙트를 가질 수 있기 때문입니다. 자바스크립트 세계에서, 함수를 호출했는데 그 결과가 실제로 "사용"되기 전까지 함수 실행이 되지 않는다면 놀라겠죠.
 
-그러나 React 컴포넌트는 [상대적으로](#purity) 순수합니다. 결과물이 화면에 렌더링되지 않는다면, 미리 실행할 필요가 전혀 없습니다.
+그러나 React 컴포넌트는 [상대적으로](#순수성) 순수합니다. 결과물이 화면에 렌더링되지 않는다면, 미리 실행할 필요가 전혀 없습니다.
 
 `<Comments>`를 `<Page>` 안에 렌더링하는 컴포넌트의 예를 보시죠:
 
@@ -672,18 +672,19 @@ function Page({ currentUser, children }) {
 </Page>
 ```
 
-This lets React decide when and *whether* to call it. If our `Page` component ignores its `children` prop and renders
-`<h1>로그인이 필요합니다</h1>` instead, React won’t even attempt to call the `Comments` function. What’s the point?
+이로써 React가 언제 `Comments`를 호출할지 결정할 수 있습니다. `Page` 컴포넌트가 `children`을 무시하고 대신
+`<h1>로그인이 필요합니다</h1>`를 렌더링한다면, React는 `Comments` 함수를 아예 호출하지 않습니다. 이렇게 되면 무엇이 좋을까요?
 
-This is good because it both lets us avoid unnecessary rendering work that would be thrown away, and makes the code less fragile. (We don’t care if `Comments` throws or not when the user is logged out — it won’t be called.)
+어차피 쓰이지 않을 불필요한 렌더링이 없어질 뿐만 아니라, 코드가 더 견고해집니다(사용자가 로그아웃했을 때 `Comments`에서 에러가 발생하더라도, 호출되지 않을 것이므로 상관없습니다).
 
-## State
+## 상태
 
-We’ve talked [earlier](#reconciliation) about identity and how element’s conceptual “position” in the tree tells React whether to re-use a host instance or create a new one. Host instances can have all kinds of local state: focus, selection, input, etc. We want to preserve this state between updates that conceptually render the same UI. We also want to predictably destroy it when we render something conceptually different (such as moving from `<SignupForm>` to `<MessengerChat>`).
+React가 호스트 인스턴스를 재사용할지 새로 만들지는 아이덴티티와 트리 안에서 엘리먼트의 개념적 "위치"에 기반해서 결정된다고 [위에서 언급](#조정)했었죠. 호스트 인스턴스는 온갖 종류의 지역 상태를 지닙니다: 포커스, 선택, 인풋 등등. 우리는 이 상태가 업데이트 사이에 유지되어, 개념적으로 같은 UI가 렌더링되길 바랍니다. 또한 개념적으로 다른 무언가를 렌더링할 때(`<SignupForm>`에서 `<MessengerChat>`으로 이동했을 때처럼)에는 지역 상태가 파괴되길 기대합니다. 
 
-**Local state is so useful that React lets *your own* components have it too.** Components are still functions but React augments them with features that are useful for UIs. Local state tied to the position in the tree is one of these features.
+**지역 상태는 너무나 유용하기 때문에, React는 *개발자가 만든* 컴포넌트에서도 지역 상태를 쓸 수 있게 했습니다.**
+컴포넌트는 여전히 함수지만, React는 UI에 도움이 되는 몇 가지 기능을 컴포넌트에 추가해줍니다. 트리 안에서 유지되는 지역 상태가 그런 기능 중 하나입니다.
 
-We call these features *Hooks*. For example, `useState` is a Hook.
+이러한 유용한 기능들을 *훅Hooks*이라고 부릅니다. `useState`도 훅의 일종입니다.
 
 ```jsx{2,6,7}
 function Example() {
@@ -691,20 +692,20 @@ function Example() {
 
   return (
     <div>
-      <p>You clicked {count} times</p>
+      <p>{count}번 클릭했습니다</p>
       <button onClick={() => setCount(count + 1)}>
-        Click me
+        클릭하세요
       </button>
     </div>
   );
 }
 ```
 
-It returns a pair of values: the current state and a function that updates it.
+`useState`는 현재 상태와, 상태를 업데이트하는 함수의 쌍을 반환합니다.
 
-The [array destructuring](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment#Array_destructuring) syntax lets us give arbitrary names to our state variables. For example, I called this pair `count` and `setCount`, but it could’ve been a `banana` and `setBanana`. In the text below, I will use `setState` to refer to the second value regardless of its actual name in the specific examples.
+[배열 디스트럭쳐링](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment#Array_destructuring) 문법을 쓰면 이 상태 변수들에 원하는 이름을 붙일 수 있습니다. 예를 들면, 저는 `count`와 `setCount`라고 이름붙였지만 `banana`와 `setBanana`가 될 수도 있는 것이죠. 이제부터는 두 번째 값은 실제 이름과 상관없이 `setState`라고 지칭하겠습니다.
 
-*(You can learn more about `useState` and other Hooks provided by React [here](https://reactjs.org/docs/hooks-intro.html).)*
+*(`useState` 와 React의 다른 훅에 대해 더 알고 싶으신 분들은 [문서](https://reactjs.org/docs/hooks-intro.html)를 읽어보세요.)*
 
 ## Consistency
 
@@ -869,7 +870,7 @@ React is different from a general purpose language runtime because it’s aimed 
 
 This may be stretching the metaphor but I like to think of React components as being in a “call tree” rather than just a “call stack”. When we go “out” of the `Article` component, its React “call tree” frame doesn’t get destroyed. We need to keep the local state and references to the host instances [somewhere](https://medium.com/react-in-depth/the-how-and-why-on-reacts-usage-of-linked-list-in-fiber-67f1014d0eb7).
 
-These “call tree” frames *are* destroyed along with their local state and host instances, but only when the [reconciliation](#reconciliation) rules say it’s necessary. If you ever read React source, you might have seen these frames being referred to as [Fibers](https://en.wikipedia.org/wiki/Fiber_(computer_science)).
+These “call tree” frames *are* destroyed along with their local state and host instances, but only when the [reconciliation](#조정) rules say it’s necessary. If you ever read React source, you might have seen these frames being referred to as [Fibers](https://en.wikipedia.org/wiki/Fiber_(computer_science)).
 
 Fibers are where the local state actually lives. When state is updated, React marks the Fibers below as needing reconciliation, and calls those components.
 
@@ -1081,7 +1082,7 @@ This is similar to how `import` only works at the top level of a module.
 
 However, React *does* expect that all calls to Hooks happen only at the top level of a component and unconditionally. These [Rules of Hooks](https://reactjs.org/docs/hooks-rules.html) can be enforced with [a linter plugin](https://www.npmjs.com/package/eslint-plugin-react-hooks). There have been heated arguments about this design choice but in practice I haven’t seen it confusing people. I also wrote about why commonly proposed alternative [don’t work](https://overreacted.io/why-do-hooks-rely-on-call-order/).
 
-Internally, Hooks are implemented as [linked lists](https://dev.to/aspittel/thank-u-next-an-introduction-to-linked-lists-4pph). When you call `useState`, we move the pointer to the next item. When we exit the component’s [“call tree” frame](#call-tree), we save the resulting list there until the next render.
+Internally, Hooks are implemented as [linked lists](https://dev.to/aspittel/thank-u-next-an-introduction-to-linked-lists-4pph). When you call `useState`, we move the pointer to the next item. When we exit the component’s [“call tree” frame](#호출-트리), we save the resulting list there until the next render.
 
 [This article](https://medium.com/@ryardley/react-hooks-not-magic-just-arrays-cd4f1857236e) provides a simplified explanation for how Hooks work internally. Arrays might be an easier mental model than linked lists:
 
@@ -1110,7 +1111,7 @@ fiber.hooks = hooks;
 
 *(If you’re curious, the real code is [here](https://github.com/facebook/react/blob/master/packages/react-reconciler/src/ReactFiberHooks.js).)*
 
-This is roughly how each `useState()` call gets the right state. As we’ve learned [earlier](#reconciliation), “matching things up” isn’t new to React — reconciliation relies on the elements matching up between renders in a similar way.
+This is roughly how each `useState()` call gets the right state. As we’ve learned [earlier](#조정), “matching things up” isn’t new to React — reconciliation relies on the elements matching up between renders in a similar way.
 
 ## What’s Left Out
 
