@@ -707,11 +707,11 @@ function Example() {
 
 *(`useState` 와 React의 다른 훅에 대해 더 알고 싶으신 분들은 [문서](https://reactjs.org/docs/hooks-intro.html)를 읽어보세요.)*
 
-## Consistency
+## 일관성
 
-Even if we want to split the reconciliation process itself into [non-blocking](https://www.youtube.com/watch?v=mDdgfyRB5kg) chunks of work, we should still perform the actual host tree operations in a single synchronous swoop. This way we can ensure that the user doesn’t see a half-updated UI, and that the browser doesn’t perform unnecessary layout and style recalculation for intermediate states that the user shouldn’t see.
+우리가 조정 과정을 [넌-블락킹](https://www.youtube.com/watch?v=mDdgfyRB5kg) 작업 여러 개로 쪼개더라도, 여전히 호스트 트리에 대한 실제 조작은 동기화된 단일 작업이길 바랄 것입니다. 사용자가 반만 업데이트된 UI를 맞닥뜨리지 않도록, 그리고 사용자가 볼 수 없는 중간 상태를 위해 브라우저가 불필요한 레이아웃과 스타일 재연산을 하지 않아도 되도록 하기 위해서 말이죠.
 
-This is why React splits all work into the “render phase” and the “commit phase”. *Render phase* is when React calls your components and performs reconciliation. It is safe to interrupt and [in the future](https://reactjs.org/blog/2018/03/01/sneak-peek-beyond-react-16.html) will be asynchronous. *Commit phase* is when React touches the host tree. It is always synchronous.
+이것이 React가 "렌더링 단계"와 "커밋 단계"를 나누는 이유입니다. *렌더링 단계*에서는 React가 컴포넌트를 호출하고 조정을 수행합니다. 이 단계는 인터럽트당해도 안전하고, 비동기적으로 작동하도록 [바뀔 예정](https://reactjs.org/blog/2018/03/01/sneak-peek-beyond-react-16.html)입니다. *커밋 단계*에서는 React가 호스트 트리를 조작하고, 언제나 동기적으로 작동합니다.
 
 
 ## Memoization
