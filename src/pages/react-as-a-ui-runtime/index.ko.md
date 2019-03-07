@@ -709,16 +709,16 @@ function Example() {
 
 ## 일관성
 
-우리가 조정 과정을 [넌-블락킹](https://www.youtube.com/watch?v=mDdgfyRB5kg) 작업 여러 개로 쪼개더라도, 여전히 호스트 트리에 대한 실제 조작은 동기화된 단일 작업이길 바랄 것입니다. 사용자가 반만 업데이트된 UI를 맞닥뜨리지 않도록, 그리고 사용자가 볼 수 없는 중간 상태를 위해 브라우저가 불필요한 레이아웃과 스타일 재연산을 하지 않아도 되도록 하기 위해서 말이죠.
+우리가 조정 과정을 [논-블락킹](https://www.youtube.com/watch?v=mDdgfyRB5kg) 작업 여러 개로 쪼개더라도, 여전히 호스트 트리에 대한 실제 조작은 동기화된 단일 작업이길 바랄 것입니다. 사용자가 반만 업데이트된 UI를 맞닥뜨리지 않도록, 그리고 사용자가 볼 수 없는 중간 상태를 위해 브라우저가 불필요한 레이아웃과 스타일 재연산을 하지 않아도 되도록 하기 위해서 말이죠.
 
 이것이 React가 "렌더링 단계"와 "커밋 단계"를 나누는 이유입니다. *렌더링 단계*에서는 React가 컴포넌트를 호출하고 조정을 수행합니다. 이 단계는 인터럽트당해도 안전하고, 비동기적으로 작동하도록 [바뀔 예정](https://reactjs.org/blog/2018/03/01/sneak-peek-beyond-react-16.html)입니다. *커밋 단계*에서는 React가 호스트 트리를 조작하고, 언제나 동기적으로 작동합니다.
 
 
-## Memoization
+## 메모이제이션
 
-When a parent schedules an update by calling `setState`, by default React reconciles its whole child subtree. This is because React can’t know whether an update in the parent would affect the child or not, and by default React opts to be consistent. This may sound very expensive but in practice it’s not a problem for small and medium-sized subtrees.
+부모가 `setState`를 호출해서 업데이트할 때, 기본적으로 React는 자식 서브트리 전체를 조정합니다. 부모의 변화가 자식에게 영향을 미칠지 아닐지를 React가 알지 못하기 때문에, 일관성을 보장하기 위해 이렇게 행동하는 것이죠. 이렇게 하는 데 비용이 아주 많이 들 것 같지만, 실제로는 서브트리의 크기가 크지 않다면 별 문제가 되지 않습니다.
 
-When trees get too deep or wide, you can tell React to [memoize](https://en.wikipedia.org/wiki/Memoization) a subtree and reuse previous render result during shallowly equal prop changes:
+트리가 너무 깊어지거나 너무 넓어졌을 때, 개발자는 React가 서브트리를 [메모이즈](https://ko.wikipedia.org/wiki/메모이제이션)하게 만들 수 있습니다. 얕은 비교에서 prop이 변하지 않았다면 지난 렌더링 결과를 재사용합니다:
 
 ```jsx{5}
 function Row({ item }) {
@@ -728,11 +728,11 @@ function Row({ item }) {
 export default React.memo(Row);
 ```
 
-Now `setState` in a parent `<Table>` component would skip over reconciling `Row`s whose `item` is referentially equal to the `item` rendered last time.
+이제 부모인 `<Table>` 컴포넌트에서 `setState`를 호출하더라도, `item`이 지난 렌더링과 같은 아이덴티티를 가진다면 `Row`의 조정을 건너뛸 것입니다.
 
-You can get fine-grained memoization at the level of individual expressions with the [`useMemo()` Hook](https://reactjs.org/docs/hooks-reference.html#usememo). The cache is local to component tree position and will be destroyed together with its local state. It only holds one last item.
+[`useMemo()` 훅](https://reactjs.org/docs/hooks-reference.html#usememo)을 쓰면 개별적으로 메모이제이션을 쓸 수 있습니다. 컴포넌트 트리의 상대 위치에 대해 캐시가 생기고, 이 캐시는 트리가 삭제될 때 로컬 스테이트와 함께 삭제됩니다. 마지막으로 호출된 상태만 기록해두고요.
 
-React intentionally doesn’t memoize components by default. Many components always receive different props so memoizing them would be a net loss.
+React에서 컴포넌트 메모이즈가 기본 설정이 아닌 것은 의도적입니다. 대다수의 컴포넌트가 언제나 새로운 props를 전달받으므로, 이런 컴포넌트를 메모이즈하는 건 순수한 낭비가 되기 때문이죠.
 
 ## Raw Models
 
